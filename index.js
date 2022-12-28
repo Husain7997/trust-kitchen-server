@@ -23,7 +23,14 @@ async function run() {
     const servicesCollection = client.db("trustKitchen").collection("services");
     const reviewCollection = client.db("trustKitchen").collection("review");
     // const addServiceCollection = client.db("trustKitchen").collection("addService");
-    
+    app.get("/", async (req, res) => {
+      const size=parseInt(req.query.size)
+      console.log(size);
+      const query = {};
+      const cursor = servicesCollection.find(query);
+      const home = await cursor.limit(size).toArray();
+      res.send(home);
+    });
 
     app.get("/services", async (req, res) => {
       const query = {}
@@ -31,12 +38,7 @@ async function run() {
       const services = await cursor.toArray();
       res.send(services);
     });
-    // app.get("/", async (req, res) => {
-    //   const query = { $limit: 3 };
-    //   const cursor = servicesCollection.find(query);
-    //   const home = await cursor.toArray();
-    //   res.send(home);
-    // });
+   
 
     app.get('/services/:id', async (req, res) => {
       const id = req.params.id;
@@ -46,12 +48,11 @@ async function run() {
     });
 
     app.get('/myreview', async (req, res) => {
-      // const id = req.params.id;
-      // console.log(id);
       let query = {};
       if (req.query.email) {
-        query={
-          email:req.query.email};
+        query = {
+          email: req.query.email
+        };
       }
       const cursor = reviewCollection.find(query);
       const myreview = await cursor.toArray();
@@ -59,40 +60,44 @@ async function run() {
     });
     app.get('/review/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+     
       let query = {};
       if (req.params.id) {
-        query={
-          id:req.query.id};
+        query = {
+          id: req.query.id
+        };
       }
       const cursor = reviewCollection.find(query);
       const review = await cursor.toArray();
       res.send(review);
     });
-    // app.get('/servicedetails/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   console.log(id);
-    //   let query = {};
-    //   if (req.params.id) {
-    //     query={
-    //       id:req.query.id};
-    //   }
-    //   const cursor = reviewCollection.find(query);
-    //   const review = await cursor.toArray();
-    //   res.send(review);
-    // });
-    app.post('/review', async(req, res) => {
-      const review =req.body;
+
+    app.post('/review', async (req, res) => {
+      const review = req.body;
       const result = await reviewCollection.insertOne(review);
-    res.send(result);
+      res.send(result);
     })
-    app.post('/addService', async(req, res) => {
-      const addService =req.body;
+    app.post('/addService', async (req, res) => {
+      const addService = req.body;
       const result = await servicesCollection.insertOne(addService);
-    res.send(result);
+      res.send(result);
     })
 
-    app.delete('/review/:id', async(req, res) => {
+    app.put('/review/:id', async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      const query = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          status: status
+        }
+      };
+      const result = await reviewCollection.updateOne(query, updatedDoc,options);
+      res.send(result);
+    });
+
+    app.delete('/review/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await reviewCollection.deleteOne(query);
