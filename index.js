@@ -25,7 +25,7 @@ async function run() {
     // const addServiceCollection = client.db("trustKitchen").collection("addService");
     app.get("/", async (req, res) => {
       const size=parseInt(req.query.size)
-      console.log(size);
+     
       const query = {};
       const cursor = servicesCollection.find(query);
       const home = await cursor.limit(size).toArray();
@@ -58,9 +58,8 @@ async function run() {
       const myreview = await cursor.toArray();
       res.send(myreview);
     });
-    app.get('/review/:id', async (req, res) => {
-      const id = req.params.id;
-     
+    app.get('/review', async (req, res) => {
+      // const id = req.params.id;
       let query = {};
       if (req.params.id) {
         query = {
